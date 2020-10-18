@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<head >
+    <meta charset="utf-8">
+    <title>SchemaEvolution</title>
+	<link rel="stylesheet" href="../static/css/dropzone.css" th:href="@{/css/dropzone.css}">
+	<link rel="stylesheet" href="../static/css/mystyle.css" th:href="@{/css/mystyle.css}">
+	<script th:src="@{/js/cytoscapemin.js}"></script>
+	<script th:src="@{/js/dagre.min.js}"></script>
+	<script th:src="@{/js/cytoscape-dagre.js}"></script>
+	<script th:src="@{/js/createJsonCrypto.js}"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+</head>
+
+<body >
+<div class="navBarStyle" >
+	<div class="homeButton" onclick="home()"> <i class="fas fa-home"></i> </div>
+	<!-- <button onclick="home()">Home</button> -->
+	QueryPage
+</div>    
+
+<div id="inputStyle">
+	<select onkeydown="inputKeyDown(event)" class="queryStyle" name="source">
+		<option th:each="schema : ${schemas}" th:value="${schema.name}" th:text="${schema.name}"></option>
+	</select>
+	<select onkeydown="inputKeyDown(event)" class="queryStyle" name="destination">
+		<option th:each="schema : ${schemas}" th:value="${schema.name}" th:text="${schema.name}"></option>
+	</select>
+	<button class="executeButton" onclick="sendQuery()">Execute <i class="fas fa-cogs"></i></button>
+</div>
+
+<div id="smoButtons">
+
+</div>
+
+<div id="popup">
+
+</div>
+
+<div id="wrapper">
+	<div id="visualize">
+	</div>
+	<div id="info">
+		<div id ="infoStyle">INFO</div>
+		<div id ="nodeInfo"></div>
+	</div>
+</div>
+
+
+<script>
+
+	function inputKeyDown(event){
+		if (event.keyCode === 13) {
+			sendQuery();
+ 		 }
+	}
+
+    function home() {
+      location.href = "http://127.0.0.1:5000/";
+    }
+	function sendQuery(){
+	      var url = 'http://127.0.0.1:8080/data';
+		  var source =  document.getElementsByName("source")[0].value;
+		  var destination =  document.getElementsByName("destination")[0].value;
+		  // var tableName =  document.getElementsByName("tableName")[0].value;
+		  // var columnName =  document.getElementsByName("columnName")[0].value;
+		  // var data = { "query":query, "tableName":tableName, "columnName":columnName }
+		  // document.getElementById("smoButtons").innerHTML = "";
+		  // if(tableName===""){
+			//   alert("You have to complete TableName");
+			//   return;
+		  // }
+		  // console.log(JSON.stringify(data));
+		var data = { "source":source, "destination":destination }
+		console.log(data)
+		fetch(url, {
+			method: 'POST',
+			body: JSON.stringify(data),
+			headers:{
+		    	'Content-Type': 'application/json'
+			}
+	      })
+	      .then(res => res.json())
+	      .then(response => returnResponse(response))
+	      .catch(error => console.error('Error:', error));
+	}
+
+	var globalResponse;
+	var globalId;
+	var globalQuery;
+
+
+	function returnResponse(response){
+		console.log(response);
+		console.log("ddsdsdsdsd");
+		// document.getElementById("smoButtons").innerHTML = "";
+		cy.elements().remove();
+		AddNodes(response["schemas"]);
+		AddEdges(response["operationsWrapperList"]);
+		var layout = cy.makeLayout({ name: 'dagre' });
+		layout.run();
+
+		globalResponse = response
+		// document.getElementById("nodeInfo").innerText =JsonSchemaHover(globalResponse[this.id]);
+
+		// document.getElementById("nodeInfo").innerText = '';
+		// if(response["data"]===null){
+		// 	//error message
+		// 	if(columnName===""){
+		// 		//alert("There is no table with id "+tableName);
+		// 	}
+		// 	else{
+		// 		//alert("There is no table with id "+tableName+" with column "+columnName);
+		// 	}
+		// 	return;
+		// }
+		// //alert(response["query"]);
+		// switch (response["query"]) {
+		// 	case "whenInsert":
+		// 		CreateButtonsWhen(response["data"]);
+		// 		break;
+		// 	case "whenDelete":
+		// 		CreateButtonsWhen(response["data"]);
+		// 		break;
+		// 	case "whenRename":
+		// 		CreateButtonsWhen(response["data"]);
+		// 		break;
+		// 	case "howInsert":
+		// 		CreateButtonsHow(response["data"]);
+		// 		break;
+		// 	case "howDelete":
+		// 		CreateButtonsHow(response["data"]);
+		// 		break;
+		// 	case "howRename":
+		// 		CreateButtonsHow(response["data"]);
+		// 		break;
+		// 	case "whyInsert":
+		// 		CreateButtonsWhy(response["data"]);
+		// 		break;
+		// 	case "whyDelete":
+		// 		CreateButtonsWhy(response["data"]);
+		// 		break;
+		// 	case "whyRename":
+		// 		CreateButtonsWhy(response["data"]);
+		// 		break;
+		// }
+		
+	}
+
+
+	//when
+	function CreateButtonsWhen(responseData){
+		//alert("when "+responseData);
+		if(responseData.length > 1){
+			var newButton;
+			var i;
+			//keep response global
+			globalResponse = null;
+			globalResponse = responseData;
+			for( i = 0; i < responseData.length; i++){
+				//alert("mpikaaaa");
+				newButton = document.createElement("BUTTON");
+				newButton.setAttribute("class","smoButtonGreen");
+				newButton.id = i;
+				newButton.innerText = "version" + i
+				newButton.addEventListener("click",createVisualizeWhen);
+				document.getElementById("smoButtons").appendChild(newButton);
+			}
+		}
+		
+		document.getElementById("nodeInfo").innerText = "";
+		document.getElementById("nodeInfo").innerText = responseData[0];
+		return;
+	}
+	function createVisualizeWhen(){
+		document.getElementById("nodeInfo").innerText = "";
+		document.getElementById("nodeInfo").innerText = globalResponse[this.id];
+	}
+
+	//How
+	function CreateButtonsHow(responseData){
+		//alert("how " +responseData);
+		globalResponse = null;
+		globalResponse = responseData;
+		globalQuery = "";
+		globalQuery = "how";
+		if(responseData.length > 1){
+			
+			var newButton;
+			var i;
+			//keep response global
+			globalResponse = null;
+			globalResponse = responseData;
+			for( i = 0; i < responseData.length; i++){
+				//alert("mpikaaaa");
+				newButton = document.createElement("BUTTON");
+				newButton.setAttribute("class","smoButtonGreen");
+				newButton.id = i;
+				newButton.innerText = "version" + i
+				newButton.addEventListener("click",createVisualizeHow);
+				document.getElementById("smoButtons").appendChild(newButton);
+			}
+		}
+		cy.elements().remove();
+		cy.add([
+           		{group: "nodes", data: {id: responseData[0]["command"],name: responseData[0]["commandHover"] }}
+			]);	
+		var layout = cy.makeLayout({ name: 'dagre' });
+		layout.run();
+		document.getElementById("nodeInfo").innerText = responseData[0]["commandHover"];
+		globalId = 0;
+		return;
+	}
+	function createVisualizeHow(){
+		globalId = this.id;
+		cy.elements().remove();
+		cy.add([
+            	{group: "nodes", data: {id: globalResponse[this.id]["command"],name: globalResponse[this.id]["commandHover"]}}
+			]);	
+		var layout = cy.makeLayout({ name: 'dagre' });
+		document.getElementById("nodeInfo").innerText = globalResponse[this.id]["commandHover"];
+		layout.run();
+	}
+
+
+	//why
+	function CreateButtonsWhy(responseData){
+		//alert("WHY " +responseData);
+		globalQuery = "";
+		globalQuery = "why";
+		if(responseData.length > 1){
+			var newButton;
+			var i;
+			//keep response global
+			globalResponse = null;
+			globalResponse = responseData;
+			for( i = 0; i < responseData.length; i++){
+				//alert("mpikaaaa");
+				newButton = document.createElement("BUTTON");
+				newButton.setAttribute("class","smoButtonGreen");
+				newButton.id = i;
+				newButton.innerText = "version" + i
+				newButton.addEventListener("click",createVisualizeWhy);
+				document.getElementById("smoButtons").appendChild(newButton);
+			}
+		}
+		cy.elements().remove();
+		AddNodes(responseData[0]);
+		AddEdges(responseData[0]);
+		var layout = cy.makeLayout({ name: 'dagre' });
+		layout.run();
+		document.getElementById("nodeInfo").innerText = JsonSchemaHover(responseData[0]);
+		globalId = 0;
+		return;
+	}
+	function createVisualizeWhy(){
+		globalId = this.id;
+		cy.elements().remove();
+		AddNodes(globalResponse[this.id]);
+		AddEdges(globalResponse[this.id]);	
+		var layout = cy.makeLayout({ name: 'dagre' });
+		layout.run();
+		document.getElementById("nodeInfo").innerText =JsonSchemaHover(globalResponse[this.id]);
+	}
+
+	function JsonSchemaHover(data){
+		let i;
+		let returnJson = "";
+		returnJson = returnJson + (data[0]["commandHover"]) + "\n\n";
+		for(i=1; i<data.length; i++){
+			returnJson= returnJson + (JsonSchemaHover(data[i]));
+			
+		}
+		return  returnJson;
+	}
+	
+
+</script>
+<script >
+	var cy = window.cy = cytoscape({
+		container: document.getElementById('visualize'),
+
+		boxSelectionEnabled: false,
+		autounselectify: true,
+
+		layout: {
+			name: 'dagre'
+		},
+
+
+		style: cytoscape.stylesheet()
+				.selector('node')
+				.css({
+					'shape' : 'circle',
+					'content': 'data(id)',
+					'text-opacity': 0.5,
+					'text-valign': 'bottom',
+					'text-halign': 'bottom',
+					'font-size' : '6px',
+					'background-color': '#10457D',
+					'color' : 'black',
+					'font-weight': '800',
+					'font-family' : 'Helvetica'
+				})
+				.selector('.select')
+				.css({
+					'border-width': 3,
+					'border-color': '#333',
+				})
+				.selector('edge')
+				.css({
+					'curve-style': 'bezier',
+					'width': 4,
+					'target-arrow-shape': 'triangle',
+					'line-color': '#9dbaea',
+					'target-arrow-color': '#9dbaea'
+				})
+	});
+
+	// cy.on('mouseover','node', function(e){
+	// 	console.log( 'hover ' + this.id() );
+	// 	cy.elements().removeClass('select');
+	// 	document.getElementById("nodeInfo").innerText = '';
+	// 	this.addClass('select');
+	// 	document.getElementById("nodeInfo").innerText = this.json()["data"]["name"];
+	// });
+
+	cy.on('click', 'node', function(e){
+		console.log( 'clicked2 ' + this.id() );
+		cy.elements().removeClass('select');
+		document.getElementById("nodeInfo").innerText = '';
+		this.addClass('select');
+		let schema = globalResponse["schemas"].find(it=>{
+			return (it["name"] === this.id())
+		})
+		let context = document.getElementById("nodeInfo").textContent
+		schema["schemaTables"].forEach(table=>{
+			context+= " Table " + table["tableName"] + " ( "
+			table["columns"].forEach(column=>{
+				context += column["columnName"]+" ";
+				context += column["type"]+", ";
+			})
+			context += " ) \n\n"
+		})
+		console.log(schema)
+		document.getElementById("nodeInfo").innerText = context;
+	});
+
+	cy.on('click', 'edge', function(e){
+		// console.log(this.data._private.source)
+		// console.log(this.data._private.target)
+		// console.log(this)
+		let sourceNode = e.cyTarget.source()[0].id()
+		let targetNode = e.cyTarget.target()[0].id()
+		let edge = globalResponse["operationsWrapperList"].find(it=>{
+			return (it["destinationSchema"] === targetNode) && (it["sourceSchema"]===sourceNode)
+		})
+		console.log(edge)
+
+		document.getElementById("nodeInfo").innerText = '';
+		// this.addClass('select');
+		let context = document.getElementById("nodeInfo").textContent
+		edge["operations"].forEach(it=>{
+			context += it["type"]+" ";
+			if(it["type"] === "REMOVE_COLUMN"||it["type"] === "ADD_COLUMN" ){
+				context += " IN " + it["table"]+", ";
+				context += it["column"]["columnName"]+" ";
+				context += it["column"]["type"]+" \n\n";
+			}
+			else if(it["type"] === "ADD_TABLE" || it["type"] === "REMOVE_TABLE"){
+				context += it["table"]["tableName"]+" ( "
+				it["table"]["columns"].forEach(column=>{
+					context += column["columnName"]+" ";
+					context += column["type"]+", ";
+				})
+				context +=") \n\n";
+				// context += it["column"]["type"]+" \n\n";
+			}
+			else if(it["type"] === "REMOVE_CONSTRAINT" || it["type"] === "ADD_CONSTRAINT"){
+				if(it["constraint"]["type"]==="NOT_NULL"){
+					context += " NOT NULL in column " + it["column"]["columnName"] + " table " + it["column"]["tableName"]
+				}
+				else if(it["constraint"]["type"]==="PRIMARY_KEY"){
+					context += " "+it["constraint"]["name"]+" PRIMARY_KEY in column " + it["column"]["columnName"] + " table " + it["column"]["tableName"]
+				}
+				else if(it["constraint"]["type"]==="FOREIGN_KEY"){
+					context += " "+it["constraint"]["name"]+" FOREIGN_KEY in column " + it["column"]["columnName"] + " table " + it["column"]["tableName"] + " REFERENCES " +it["constraint"]["fkDestinationTable"]+"."+it["constraint"]["fkDestinationColumn"]
+				}
+				context +=") \n\n";
+
+			}
+		})
+		document.getElementById("nodeInfo").innerText = context
+	});
+
+
+
+	// cy.on('mouseout','node', function(e) {
+	// 	cy.elements().removeClass('select');
+	// 	//document.getElementById("nodeInfo").innerText = globalResponse[globalId];
+	// 	if(globalQuery == "why"){
+	// 		document.getElementById("nodeInfo").innerText = JsonSchemaHover(globalResponse[globalId]);
+	// 	}
+	// 	else{
+	// 		document.getElementById("nodeInfo").innerText = globalResponse[globalId]["commandHover"];
+	// 	}
+	//
+	//
+	// });
+
+	cy.on('tap', function(e) {
+		if (e.cyTarget === cy) {
+			cy.elements().removeClass('select');
+			document.getElementById("nodeInfo").innerText = '';
+		}
+	});
+
+</script>
+
+
+</body>
+</html>
+

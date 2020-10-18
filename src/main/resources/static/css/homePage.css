@@ -1,0 +1,48 @@
+
+
+html, body {
+    margin: 0;
+    height: 100%;
+    background-color: #F3F3F3;
+}
+
+
+
+.startButtonContainer{
+    width:100%;
+    height:10%;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#startButton{
+    height:90%;
+    width:20%;
+    background-color:#10457D;
+    color:white;
+    border-radius:50px;
+    font-size: 1.5em;
+    outline:0;
+    font-family: Helvetica, Verdana, Arial;
+    cursor: pointer;
+}
+
+#startButton:hover{
+    font-size: 1.75em;
+}
+
+
+.navBarStyle{
+    width:100%;
+    height:7%;
+    background-color:#395E80;
+    font-size: 1.5em;
+    color:white;
+    display:flex;
+    align-items: center;
+    padding-left:1%;
+    font-family: Helvetica, Verdana, Arial;
+    font-weight: 600;
+}

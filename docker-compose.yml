@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+
+  schemaEvolution_db:
+    container_name: schemaEvolution_db
+    image: postgres:12
+    volumes:
+      - "schemaEvolution_db_data:/postgres"
+    ports:
+      - 5464:5432
+    environment:
+      PGDATA: "/postgres/db"
+      POSTGRES_DB: "schemaEvolution_db"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+
+volumes:
+  schemaEvolution_db_data:
+    driver: "local"
