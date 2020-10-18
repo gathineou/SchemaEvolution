@@ -1,12 +1,12 @@
 # Schema evolution history application
 
 A Kotlin app for structuring, analysing and visualizing the evolution history of a PostgreSQL database schema.
-This exploration started as part of the PAV ITOpenSpace and is a work in progress.
-The app can parse historical database schemas and identify the history of changes (schema modification operations) 
-from a source schema version to another.
-The tool offers a simple interactive dashboard for visualization and further explorations.
+Started as part of the PAV ITOpenSpace and is a work in progress.
 
-## Schema evolution
+The app can parse historical database schemas and identify the history of changes (schema modification operations) 
+from a source schema version to another offering an interactive dashboard for visualization and further analysis.
+
+## Context
 Schema evolution and schema versioning techniques, deal with the need to retain current data and software system 
 functionality in the face of changing database structure. The problem is not limited to the modification of the schema. 
 It can affect the data stored under the given schema, and the queries posed on that schema (Wikipedia).
