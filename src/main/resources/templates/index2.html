@@ -56,7 +56,7 @@
 	}
 
     function home() {
-      location.href = "http://127.0.0.1:5000/";
+      location.href = "http://127.0.0.1:8080/";
     }
 	function sendQuery(){
 	      var url = 'http://127.0.0.1:8080/data';
@@ -102,49 +102,6 @@
 
 		globalResponse = response
 		// document.getElementById("nodeInfo").innerText =JsonSchemaHover(globalResponse[this.id]);
-
-		// document.getElementById("nodeInfo").innerText = '';
-		// if(response["data"]===null){
-		// 	//error message
-		// 	if(columnName===""){
-		// 		//alert("There is no table with id "+tableName);
-		// 	}
-		// 	else{
-		// 		//alert("There is no table with id "+tableName+" with column "+columnName);
-		// 	}
-		// 	return;
-		// }
-		// //alert(response["query"]);
-		// switch (response["query"]) {
-		// 	case "whenInsert":
-		// 		CreateButtonsWhen(response["data"]);
-		// 		break;
-		// 	case "whenDelete":
-		// 		CreateButtonsWhen(response["data"]);
-		// 		break;
-		// 	case "whenRename":
-		// 		CreateButtonsWhen(response["data"]);
-		// 		break;
-		// 	case "howInsert":
-		// 		CreateButtonsHow(response["data"]);
-		// 		break;
-		// 	case "howDelete":
-		// 		CreateButtonsHow(response["data"]);
-		// 		break;
-		// 	case "howRename":
-		// 		CreateButtonsHow(response["data"]);
-		// 		break;
-		// 	case "whyInsert":
-		// 		CreateButtonsWhy(response["data"]);
-		// 		break;
-		// 	case "whyDelete":
-		// 		CreateButtonsWhy(response["data"]);
-		// 		break;
-		// 	case "whyRename":
-		// 		CreateButtonsWhy(response["data"]);
-		// 		break;
-		// }
-		
 	}
 
 
@@ -359,6 +316,8 @@
 
 		document.getElementById("nodeInfo").innerText = '';
 		// this.addClass('select');
+
+		// TODO: Refactor logic
 		let context = document.getElementById("nodeInfo").textContent
 		edge["operations"].forEach(it=>{
 			context += it["type"]+" ";
